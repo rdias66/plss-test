@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Uuids;
 
 class Ticket extends Model
 {
-    use HasFactory;
+    use HasFactory, Uuids; // Use the Uuids trait
+
     protected $fillable = [
         'title',
         'category_id',
@@ -16,21 +18,22 @@ class Ticket extends Model
         'status_id',
     ];
 
-    public $timestamps = false;
-
     protected $dates = [
         'deleted_at',
         'solution_deadline',
         'solved_at',
     ];
 
-    public static function boot()
+    protected $casts = [
+        'solution_deadline' => 'date',
+    ];
+
+    protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($ticket) {
             $ticket->solution_deadline = now()->addDays(3);
-            $ticket->status_id = 1;
         });
     }
 
@@ -46,8 +49,15 @@ class Ticket extends Model
 
     public function updateStatus($newStatus)
     {
-        if (in_array($newStatus, Status::allowedStatuses())) {
-            $this->status_id = Status::where('name', $newStatus)->first()->id;
+        $status = Status::where('name', $newStatus)->first();
+
+        if ($status && in_array($status->name, ['Pendente', 'Resolvido'])) {
+            $this->status_id = $status->id;
+
+            if ($status->name === 'Resolvido') {
+                $this->solved_at = now();
+            }
+
             $this->save();
         } else {
             throw new \InvalidArgumentException("Invalid status provided.");

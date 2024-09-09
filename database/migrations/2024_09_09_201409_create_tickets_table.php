@@ -12,15 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tickets', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('title');
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
+            $table->uuid('category_id');
             $table->text('description');
             $table->date('solution_deadline')->default(now()->addDays(3));
-            $table->foreignId('status_id')->constrained()->onDelete('cascade');
+            $table->uuid('status_id');
             $table->timestamps();
-            $table->timestamp('deleted_at')->useCurrent();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamp('solved_at')->nullable();
+
+
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
+            $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade');
         });
     }
 
