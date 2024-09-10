@@ -38,9 +38,23 @@ class TicketController extends Controller
         return response()->json($ticket);
     }
 
+    public function getByStatus($status_id)
+    {
+        $tickets = Ticket::where('status_id', $status_id)
+            ->with(['category', 'status'])
+            ->get();
+
+        if ($tickets->isEmpty()) {
+            return response()->json(['message' => 'No tickets found for this status.'], 404);
+        }
+
+        return response()->json($tickets);
+    }
+
     public function update(Request $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
+
 
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',

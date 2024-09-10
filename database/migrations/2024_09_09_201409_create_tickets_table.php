@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('solution_deadline')->default(now()->addDays(3));
             $table->uuid('status_id');
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->softDeletes();
             $table->timestamp('solved_at')->nullable();
 
 

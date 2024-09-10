@@ -12,6 +12,10 @@ class Status extends Model
 
     protected $guarded = [];
 
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     public function tickets()
     {
         return $this->hasMany(Ticket::class);

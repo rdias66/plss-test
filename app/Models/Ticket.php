@@ -30,6 +30,10 @@ class Ticket extends Model
         'solution_deadline' => 'date',
     ];
 
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     protected static function boot()
     {
         parent::boot();
