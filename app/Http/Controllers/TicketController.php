@@ -79,4 +79,33 @@ class TicketController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function getSLA()
+    {
+        $now = new \DateTime();
+        $currentMonth = $now->format('m');
+        $currentYear = $now->format('Y');
+        $deadlineDays = 3;
+
+        $tickets = Ticket::whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->get();
+
+        $totalTickets = $tickets->count();
+        $withinDeadlineCount = $tickets->filter(function ($ticket) use ($deadlineDays) {
+            if ($ticket->resolved_at) {
+                $createdDate = new \DateTime($ticket->created_at);
+                $resolvedDate = new \DateTime($ticket->resolved_at);
+                $interval = $resolvedDate->diff($createdDate);
+                return $interval->days <= $deadlineDays && $interval->invert == 0;
+            }
+            return false;
+        })->count();
+
+        $slaPercentage = $totalTickets > 0 ? ($withinDeadlineCount / $totalTickets) * 100 : 0;
+
+        return response()->json([
+            'sla_percentage' => round($slaPercentage, 2),
+        ]);
+    }
 }

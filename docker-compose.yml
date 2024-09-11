@@ -13,5 +13,26 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php_app
+    environment:
+      DB_HOST: db
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    command: >
+      sh -c "
+        php artisan migrate &&
+        php artisan db:seed &&
+        php artisan serve --host=0.0.0.0 --port=8080
+      "
+
 volumes:
   postgres_data:

@@ -11,6 +11,7 @@ Route::get('/tickets/{id}', [TicketController::class, 'get']);
 Route::get('/tickets/status/{status_id}', [TicketController::class, 'getByStatus']);
 Route::put('/tickets/{id}', [TicketController::class, 'update']);
 Route::delete('/tickets/{id}', [TicketController::class, 'delete']);
+Route::get('/tickets/sla', [TicketController::class, 'getSLA']);
 
 Route::get('/categories', [CategoryController::class, 'getAll']);
 Route::post('/categories', [CategoryController::class, 'create']);
