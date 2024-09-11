@@ -53,9 +53,9 @@ class Ticket extends Model
         return $this->belongsTo(Status::class);
     }
 
-    public function updateStatus($newStatus)
+    public function updateStatus($newStatusId)
     {
-        $status = Status::where('name', $newStatus)->first();
+        $status = Status::find($newStatusId);
 
         if ($status && in_array($status->name, ['Pendente', 'Resolvido'])) {
             $this->status_id = $status->id;
@@ -66,7 +66,7 @@ class Ticket extends Model
 
             $this->save();
         } else {
-            throw new \InvalidArgumentException("Invalid status provided.");
+            throw new \InvalidArgumentException("Invalid status ID provided.");
         }
     }
 }

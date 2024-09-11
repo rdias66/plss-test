@@ -53,21 +53,26 @@ class TicketController extends Controller
 
     public function update(Request $request, $id)
     {
+
         $ticket = Ticket::findOrFail($id);
 
-
         $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'category_id' => 'sometimes|required|exists:categories,id',
-            'description' => 'sometimes|required|string',
-            'status' => 'sometimes|required|in:Pendente,Resolvido',
+            'title' => 'nullable|string|max:255',
+            'category_id' => 'nullable|exists:categories,id',
+            'description' => 'nullable|string',
+            'status_id' => 'nullable|exists:statuses,id',
         ]);
 
-        if (isset($validated['status'])) {
-            $ticket->updateStatus($validated['status']);
+        if (isset($validated['status_id'])) {
+            try {
+
+                $ticket->updateStatus($validated['status_id']);
+            } catch (\InvalidArgumentException $e) {
+                return response()->json(['error' => $e->getMessage()], 400);
+            }
         }
 
-        $ticket->update($validated);
+        $ticket->update(array_filter($validated, fn($value) => !is_null($value)));
 
         return response()->json($ticket);
     }
