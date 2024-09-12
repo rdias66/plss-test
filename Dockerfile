@@ -1,23 +1,28 @@
-FROM php:8.2-fpm
+FROM php:8.3-cli-alpine
 
-WORKDIR /var/www
-
-RUN apt-get update && apt-get install -y \
+RUN apk update && apk add --no-cache \
+  libpng-dev \
+  libjpeg-turbo-dev \
+  freetype-dev \
+  postgresql-dev \
   git \
-  curl \
-  zip \
   unzip \
-  libpq-dev \
-  && docker-php-ext-install pdo pdo_pgsql
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-install gd pdo pdo_pgsql \
+  && apk del \
+  && rm -rf /var/cache/apk/*
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+WORKDIR /app
 
 COPY . .
 
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
 RUN composer install --no-dev --optimize-autoloader
 
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /app \
+  && chmod -R 755 /app
 
 EXPOSE 8080
 
-CMD ["php-fpm"]
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
